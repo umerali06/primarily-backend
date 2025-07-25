@@ -40,6 +40,11 @@ exports.createItem = async (req, res, next) => {
     // Add images to request body
     req.body.images = images;
 
+    // Handle empty folderId - convert to null
+    if (req.body.folderId === "" || req.body.folderId === "null") {
+      req.body.folderId = null;
+    }
+
     // Create item
     const item = await Item.create(req.body);
 
@@ -48,9 +53,7 @@ exports.createItem = async (req, res, next) => {
       userId: req.user.id,
       resourceId: item._id,
       resourceType: "item",
-      type: "item_create",
-      title: "Item Created",
-      description: `Item "${item.name}" was created`,
+      action: "create",
       details: {
         name: item.name,
         quantity: item.quantity,
@@ -204,6 +207,11 @@ exports.updateItem = async (req, res, next) => {
     // Add images to request body
     req.body.images = images;
 
+    // Handle empty folderId - convert to null
+    if (req.body.folderId === "" || req.body.folderId === "null") {
+      req.body.folderId = null;
+    }
+
     // Store previous item state for comparison
     const previousItem = { ...item.toObject() };
 
@@ -231,9 +239,7 @@ exports.updateItem = async (req, res, next) => {
         userId: req.user.id,
         resourceId: item._id,
         resourceType: "item",
-        type: "item_update",
-        title: "Item Updated",
-        description: `Item "${item.name}" was updated`,
+        action: "update",
         details: {
           changes,
           name: item.name,

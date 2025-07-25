@@ -25,13 +25,33 @@ const getTags = async (req, res, next) => {
     const sort = {};
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
-    const tags = await Tag.find(query)
-      .sort(sort)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .lean();
+    // Get tags with item counts
+    const allTagsWithCounts = await Tag.getTagsWithCounts(req.user.id);
 
-    const total = await Tag.countDocuments(query);
+    // Apply search filter
+    let filteredTags = allTagsWithCounts;
+    if (search) {
+      filteredTags = allTagsWithCounts.filter((tag) =>
+        tag.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    // Apply sorting
+    filteredTags.sort((a, b) => {
+      const aVal = a[sortBy];
+      const bVal = b[sortBy];
+      const multiplier = sortOrder === "desc" ? -1 : 1;
+
+      if (aVal < bVal) return -1 * multiplier;
+      if (aVal > bVal) return 1 * multiplier;
+      return 0;
+    });
+
+    // Apply pagination
+    const startIndex = (page - 1) * limit;
+    const tags = filteredTags.slice(startIndex, startIndex + parseInt(limit));
+
+    const total = filteredTags.length;
 
     return ApiResponse.success(res, "Tags retrieved successfully", {
       tags,
@@ -134,7 +154,6 @@ const updateTag = async (req, res, next) => {
     if (description !== undefined) tag.description = description;
 
     await tag.save();
-    await tag.updateItemCount();
 
     return ApiResponse.success(res, "Tag updated successfully", { tag });
   } catch (error) {

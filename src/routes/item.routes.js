@@ -24,6 +24,11 @@ const createItemValidation = [
     .trim()
     .isLength({ max: 1000 })
     .withMessage("Description cannot be more than 1000 characters"),
+  body("notes")
+    .optional()
+    .trim()
+    .isLength({ max: 2000 })
+    .withMessage("Notes cannot be more than 2000 characters"),
   body("quantity")
     .optional()
     .isNumeric()
@@ -47,7 +52,7 @@ const createItemValidation = [
   body("folderId")
     .optional()
     .custom((value) => {
-      if (value === null || value === "null") return true;
+      if (value === null || value === "null" || value === "") return true;
       return /^[0-9a-fA-F]{24}$/.test(value);
     })
     .withMessage("Invalid folder ID"),
@@ -64,6 +69,11 @@ const updateItemValidation = [
     .trim()
     .isLength({ max: 1000 })
     .withMessage("Description cannot be more than 1000 characters"),
+  body("notes")
+    .optional()
+    .trim()
+    .isLength({ max: 2000 })
+    .withMessage("Notes cannot be more than 2000 characters"),
   body("quantity")
     .optional()
     .isNumeric()
@@ -87,7 +97,7 @@ const updateItemValidation = [
   body("folderId")
     .optional()
     .custom((value) => {
-      if (value === null || value === "null") return true;
+      if (value === null || value === "null" || value === "") return true;
       return /^[0-9a-fA-F]{24}$/.test(value);
     })
     .withMessage("Invalid folder ID"),
