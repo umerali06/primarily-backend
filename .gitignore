@@ -30,4 +30,4 @@ Thumbs.db
 .idea/
 .vscode/
 *.sublime-project
-*.sublime-workspace
+*.sublime-workspace.env.development
