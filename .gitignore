@@ -33,3 +33,4 @@ Thumbs.db
 *.sublime-workspace.env.development
 .env.development
 .env.development
+.env.production

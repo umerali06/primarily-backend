@@ -28,7 +28,7 @@ const configureSecurity = (app) => {
     })
   );
 
-  // Configure CORS with more permissive settings for development
+  // Configure CORS with support for both development and production
   app.use(
     cors({
       origin: (origin, callback) => {
@@ -36,6 +36,7 @@ const configureSecurity = (app) => {
         if (!origin) return callback(null, true);
 
         const allowedOrigins = [
+          // Local development origins
           "http://localhost:3000",
           "http://localhost:5173",
           "http://localhost:5174",
@@ -51,15 +52,35 @@ const configureSecurity = (app) => {
           "http://localhost:5003",
           "http://localhost:5004",
           "http://localhost:5005",
+          // Production origins - Your actual URLs
+          "https://primarly.netlify.app",
+          "https://primarily-backend.onrender.com",
         ];
+
+        // Check for Netlify branch previews (deploy-preview-*)
+        const isNetlifyPreview =
+          origin &&
+          origin.match(
+            /^https:\/\/deploy-preview-\d+--primarly\.netlify\.app$/
+          );
+
+        // Check for Render preview deployments
+        const isRenderPreview =
+          origin &&
+          origin.match(
+            /^https:\/\/primarily-backend-[a-z0-9]+\.onrender\.com$/
+          );
 
         if (
           allowedOrigins.includes(origin) ||
+          isNetlifyPreview ||
+          isRenderPreview ||
           config.nodeEnv === "development"
         ) {
           return callback(null, true);
         }
 
+        console.log(`CORS blocked origin: ${origin}`);
         return callback(new Error("Not allowed by CORS"));
       },
       credentials: true,
